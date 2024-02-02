@@ -46,11 +46,19 @@ for (i in 1:ncol(kontroltablo)){
     } else{
       olasılıklar[i,j]<-NA
     }
-     
-   }
- }  
+  }
+}  
 
-olasılıklar3<-na.omit(olasılıklar)
+filtre_olas<-data.frame(NA)
+
+for (i in 1:ncol(olasılıklar)){ 
+  for(j in 1:ncol(olasılıklar)){
+    if (is.na(olasılıklar[i,j])==FALSE){
+      filtre_olas[,]<-olasılıklar[i,j]}  
+      
+  }
+  unique<-as.data.frame(sort(unique(as.vector(as.matrix(olasılıklar)))))
+}
 
 
 
