@@ -60,10 +60,97 @@ for (i in 1:ncol(olasılıklar)){
   unique<-as.data.frame(sort(unique(as.vector(as.matrix(olasılıklar)))))
 }
 
+#### googlesheet'ten veri çekme ####
 
+toto<-read_sheet("https://docs.google.com/spreadsheets/d/1kPf7F2MQknLMBM_q2-AHxK1aclzVpwZuus4dOkkKM4s/edit?usp=sharing")
+toto<-toto%>%
+  select(c(1,2,5,6,9,10,11))
+toto<-toto[6:2035,]
+colnames(toto)<-c("Sira", "Mac", "Sonuc", "Mac_gunu", "Osman", "Okan", "Rasim")
+toto2<-na.omit(toto)
+toto2<-filter(toto2, toto2$Sira!="Sıra")
+toto2<-filter(toto2, toto2$Sira!="NULL")
+toto2$hafta<-c(sort(rep(1:(nrow(toto2)/15),15)))
+toto2<-as.data.frame(toto2)
 
+totoguncel<-write.xlsx2(toto2,"totoguncel.xlsx")
 
+#### googlesheet'ten hesaplama yapma #####
 
+tahmin2<-filter(toto2, max(toto2$hafta)==toto2$hafta) 
+tahmin2turk<-tahmin2[1:10,]
+tahmin2yab<-tahmin2[11:15,]
+
+oranlar<-data.frame(Osman=c(0.45, 0.68, 0.57, 0.75), Okan=c(0.5, 0.6, 0.58, 0.73), Rasim=c(0.4, 0.66, 0.46, 0.7))
+row.names(oranlar)<-c("turk_tek","turk_cift","yab_tek", "yab_cift")
+
+dogrusaytek<-data.frame(NA)
+dogrusay2<-data.frame(NA)
+
+for(i in 1:10){
+for (j in 1:3){  
+  if (tahmin2turk[i,(j+4)]<10){
+    dogrusaytek[i,j]<-1
+}
+    else{
+      dogrusaytek[i,j]<-2
+  }
+  }
+}
+
+tektopla<-data.frame(NA)
+for(i in 1:10){
+  for (j in 1:3){  
+    if (dogrusaytek[i,j]==1){
+     tektopla[i,j] <- dogrusaytek[i,j]*oranlar[1,j]
+    }
+    else{
+      tektopla[i,j]<-(dogrusaytek[i,j]*oranlar[2,j])/2
+    }
+  }
+}
+dogrusay2<-ceiling(colSums(tektopla))
+
+kontroltablo2<-matrix(NA,nrow(tahmin2turk),choose(nrow(tahmin2turk),dogrusay[1]))
+ltek2 <- rep(list(olastek), nrow(tahmin2turk))
+atrtek2<-expand.grid(ltek2)
+tatrtek2<-as.data.frame(t(atrtek2))
+
+as2<-as.data.frame(combn(tahmintek$kod, dogrusay))
+
+for (i in 1:nrow(as)){ 
+  for(j in 1:ncol(as)){
+    if (as[i,j]=="a") {
+      kontroltablo[1,j]=1}
+    else if (as[i,j]=="b") {
+      kontroltablo[2,j]=0}
+    else if(as[i,j]=="c") {
+      kontroltablo[3,j]=2}
+    else if (as[i,j]=="d") {
+      kontroltablo[4,j]=0}
+    else  {kontroltablo[5,j]=1}
+  }
+}
+
+olasılıklar<-data.frame(NA)
+for (i in 1:ncol(kontroltablo)){ 
+  for(j in 1:ncol(tatr)){
+    if (sum(kontroltablo[,i]==tatr[,j], na.rm=TRUE)==3){
+      olasılıklar[i,j]<-j
+    } else{
+      olasılıklar[i,j]<-NA
+    }
+  }
+}  
+
+filtre_olas<-data.frame(NA)
+for (i in 1:ncol(olasılıklar)){ 
+  for(j in 1:ncol(olasılıklar)){
+    if (is.na(olasılıklar[i,j])==FALSE){
+      filtre_olas[,]<-olasılıklar[i,j]}  
+  }
+  unique<-as.data.frame(sort(unique(as.vector(as.matrix(olasılıklar)))))
+}
 
 
 
